@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คำนวณต้นทุนขนมไทย</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@400;600;700&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf6ee;
+    --surface: #fff9f2;
+    --card: #ffffff;
+    --border: #e8d5b7;
+    --gold: #c49a3c;
+    --gold-light: #e8c97a;
+    --gold-dark: #8a6820;
+    --brown: #6b3d1e;
+    --brown-light: #a0623a;
+    --text: #2d1a0e;
+    --text-soft: #7a5c42;
+    --text-muted: #b09070;
+    --red: #c0392b;
+    --green: #2e7d32;
+    --shadow: 0 2px 16px rgba(100,60,20,0.10);
+    --shadow-card: 0 4px 24px rgba(100,60,20,0.13);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: linear-gradient(135deg, var(--brown) 0%, #3d1a08 100%);
+    color: #fff;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .logo-text h1 {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+  }
+  .logo-text p {
+    font-size: 0.75rem;
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+  }
+  #shop-name-display {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 0.9rem;
+    color: var(--gold-light);
+    font-style: italic;
+  }
+
+  /* ===== SETUP BANNER ===== */
+  #setup-banner {
+    background: linear-gradient(90deg, #fff3cd, #ffeaa7);
+    border-bottom: 2px solid var(--gold);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: var(--brown);
+  }
+  #setup-banner.hidden { display: none; }
+
+  /* ===== TABS ===== */
+  .tabs {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 24px 0;
+    display: flex;
+    gap: 4px;
+  }
+  .tab-btn {
+    padding: 10px 22px;
+    border: 2px solid var(--border);
+    border-bottom: none;
+    background: var(--surface);
+    color: var(--text-soft);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border-radius: 10px 10px 0 0;
+    transition: all 0.2s;
+    font-weight: 600;
+  }
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--brown);
+    border-color: var(--gold);
+    border-bottom-color: var(--card);
+    position: relative;
+    z-index: 1;
+  }
+  .tab-btn:hover:not(.active) {
+    background: #fff;
+    color: var(--text);
+  }
+
+  /* ===== MAIN ===== */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+  }
+
+  .tab-panel {
+    display: none;
+    background: var(--card);
+    border: 2px solid var(--gold);
+    border-radius: 0 12px 12px 12px;
+    padding: 28px;
+    box-shadow: var(--shadow-card);
+  }
+  .tab-panel.active { display: block; }
+
+  /* ===== SECTION HEADER ===== */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .section-title {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 1.2rem;
+    color: var(--brown);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    padding: 9px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--gold);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--gold-dark); transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent;
+    border: 2px solid var(--gold);
+    color: var(--gold-dark);
+  }
+  .btn-secondary:hover { background: #fef3d0; }
+  .btn-danger {
+    background: transparent;
+    border: 2px solid #e57373;
+    color: var(--red);
+    padding: 6px 12px;
+    font-size: 0.82rem;
+  }
+  .btn-danger:hover { background: #fdecea; }
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 0.82rem;
+  }
+
+  /* ===== FORM ===== */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-soft);
+    letter-spacing: 0.02em;
+  }
+  input, select {
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.95rem;
+    background: var(--surface);
+    color: var(--text);
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: #fff;
+  }
+
+  /* ===== TABLE ===== */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-top: 16px;
+  }
+  .data-table th {
+    background: linear-gradient(135deg, var(--brown), #5a2e10);
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+  }
+  .data-table th:first-child { border-radius: 8px 0 0 0; }
+  .data-table th:last-child { border-radius: 0 8px 0 0; }
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #fef8f0; }
+  .data-table .unit-badge {
+    background: var(--gold-light);
+    color: var(--gold-dark);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .price-per-unit {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  /* ===== MENU CARDS ===== */
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .menu-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .menu-card:hover {
+    border-color: var(--gold);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+  .menu-card.active-card {
+    border-color: var(--gold);
+    background: #fffbf0;
+    box-shadow: 0 0 0 3px rgba(196,154,60,0.15);
+  }
+  .menu-card-name {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--brown);
+    margin-bottom: 8px;
+  }
+  .menu-card-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.82rem;
+    color: var(--text-soft);
+  }
+  .menu-card-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--green);
+    margin-top: 10px;
+  }
+  .menu-card-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  /* ===== COST CALCULATOR ===== */
+  .calc-container {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    margin-top: 20px;
+  }
+  @media (max-width: 680px) {
+    .calc-container { grid-template-columns: 1fr; }
+  }
+
+  .ingredient-add-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .ingredient-add-row .form-group { flex: 1; min-width: 140px; }
+
+  .ingredient-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.88rem;
+  }
+  .ingredient-list-item .ing-name { flex: 1; font-weight: 600; color: var(--brown); }
+  .ingredient-list-item .ing-qty {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-soft);
+  }
+  .ingredient-list-item .ing-qty input {
+    width: 70px;
+    padding: 5px 8px;
+    font-size: 0.85rem;
+  }
+  .ingredient-list-item .ing-cost { color: var(--gold-dark); font-weight: 700; min-width: 60px; text-align: right; }
+  .remove-ing { color: var(--red); cursor: pointer; font-size: 1.1rem; border: none; background: none; padding: 0 4px; }
+  .remove-ing:hover { color: #900; }
+
+  /* ===== SUMMARY BOX ===== */
+  .summary-box {
+    background: linear-gradient(160deg, var(--brown) 0%, #3d1a08 100%);
+    border-radius: 14px;
+    padding: 22px;
+    color: #fff;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+  }
+  .summary-box h3 {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 1.1rem;
+    color: var(--gold-light);
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    padding-bottom: 10px;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.88rem;
+  }
+  .summary-row .label { color: rgba(255,255,255,0.7); }
+  .summary-row .value { font-weight: 700; color: var(--gold-light); }
+  .summary-divider {
+    border: none;
+    border-top: 1px dashed rgba(255,255,255,0.2);
+    margin: 12px 0;
+  }
+  .summary-total {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+  .summary-total .total-label { color: var(--gold-light); font-size: 0.82rem; margin-bottom: 4px; }
+  .summary-total .total-value {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .summary-input-group {
+    margin: 10px 0;
+  }
+  .summary-input-group label { color: rgba(255,255,255,0.75); font-size: 0.8rem; display: block; margin-bottom: 4px; }
+  .summary-input-group input {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    font-size: 0.9rem;
+  }
+  .summary-input-group input::placeholder { color: rgba(255,255,255,0.4); }
+  .summary-input-group input:focus { background: rgba(255,255,255,0.2); border-color: var(--gold-light); }
+
+  /* ===== SETTINGS ===== */
+  .settings-section {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .settings-section h3 {
+    font-family: 'Noto Serif Thai', serif;
+    color: var(--brown);
+    margin-bottom: 14px;
+    font-size: 1rem;
+  }
+
+  /* ===== TOAST ===== */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--brown);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    max-width: 300px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { background: var(--green); }
+  #toast.error { background: var(--red); }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 28px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+  }
+  .modal h3 {
+    font-family: 'Noto Serif Thai', serif;
+    color: var(--brown);
+    margin-bottom: 18px;
+    font-size: 1.15rem;
+  }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 10px; }
+  .empty-state p { font-size: 0.9rem; }
+
+  .api-url-note {
+    background: #fff3cd;
+    border: 1.5px solid var(--gold);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.85rem;
+    color: var(--brown);
+    margin-bottom: 20px;
+  }
+  .api-url-note code {
+    background: rgba(0,0,0,0.07);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    word-break: break-all;
+  }
+
+  @media (max-width: 600px) {
+    .header-inner { padding: 12px 16px; }
+    .tabs { padding: 16px 12px 0; }
+    main { padding: 0 12px 40px; }
+    .tab-panel { padding: 18px; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🍮</div>
+      <div class="logo-text">
+        <h1>คำนวณต้นทุนขนมไทย</h1>
+        <p id="shop-name-display">ตั้งชื่อร้านในการตั้งค่า</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div id="setup-banner">
+  ⚙️ ยังไม่ได้ตั้งค่า URL ของ Apps Script — ไปที่แท็บ <strong>ตั้งค่า</strong> ก่อนใช้งาน
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('ingredients')">🧂 วัตถุดิบ</button>
+  <button class="tab-btn" onclick="switchTab('menus')">📋 เมนู</button>
+  <button class="tab-btn" onclick="switchTab('settings')">⚙️ ตั้งค่า</button>
+</div>
+
+<main>
+
+  <!-- ===== TAB: วัตถุดิบ ===== -->
+  <div id="tab-ingredients" class="tab-panel active">
+    <div class="section-header">
+      <div class="section-title">🧂 ข้อมูลวัตถุดิบ</div>
+      <button class="btn btn-primary" onclick="openIngredientModal()">+ เพิ่มวัตถุดิบ</button>
+    </div>
+    <div id="ingredients-table-wrap">
+      <div class="empty-state"><div class="icon">🥄</div><p>ยังไม่มีวัตถุดิบ — กดเพิ่มได้เลยครับ</p></div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: เมนู ===== -->
+  <div id="tab-menus" class="tab-panel">
+    <div class="section-header">
+      <div class="section-title">📋 จัดการเมนู</div>
+      <button class="btn btn-primary" onclick="openNewMenu()">+ เพิ่มเมนูใหม่</button>
+    </div>
+
+    <div id="menu-list-view">
+      <div id="menu-cards" class="menu-grid">
+        <div class="empty-state"><div class="icon">🍬</div><p>ยังไม่มีเมนู — กดเพิ่มเมนูใหม่</p></div>
+      </div>
+    </div>
+
+    <div id="menu-editor" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" onclick="backToMenuList()">← กลับ</button>
+        <div class="form-group" style="flex:1;max-width:320px">
+          <label>ชื่อเมนู</label>
+          <input type="text" id="menu-name" placeholder="เช่น ข้าวเหนียวมะม่วง">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveCurrentMenu()">💾 บันทึก</button>
+      </div>
+
+      <div class="calc-container">
+        <div>
+          <div style="font-weight:600;color:var(--brown);margin-bottom:12px;font-family:'Noto Serif Thai',serif">เพิ่มวัตถุดิบ</div>
+          <div class="ingredient-add-row">
+            <div class="form-group">
+              <label>เลือกวัตถุดิบ</label>
+              <select id="ing-select">
+                <option value="">-- เลือก --</option>
+              </select>
+            </div>
+            <div class="form-group" style="max-width:110px">
+              <label>ปริมาณที่ใช้</label>
+              <input type="number" id="ing-qty" placeholder="0" min="0">
+            </div>
+            <button class="btn btn-secondary" style="flex-shrink:0" onclick="addIngredientToMenu()">+ เพิ่ม</button>
+          </div>
+          <div id="menu-ingredient-list"></div>
+        </div>
+
+        <div class="summary-box">
+          <h3>📊 สรุปต้นทุน</h3>
+
+          <div class="summary-row">
+            <span class="label">ต้นทุนวัตถุดิบรวม</span>
+            <span class="value" id="s-ingredient-total">0.00 ฿</span>
+          </div>
+
+          <div class="summary-input-group">
+            <label>จำนวนที่ได้ (ชิ้น/กล่อง)</label>
+            <input type="number" id="s-yield" placeholder="เช่น 10" min="1" oninput="recalc()">
+          </div>
+
+          <div class="summary-row">
+            <span class="label">ต้นทุน/ชิ้น (วัตถุดิบ)</span>
+            <span class="value" id="s-cost-per-unit">0.00 ฿</span>
+          </div>
+
+          <hr class="summary-divider">
+
+          <div class="summary-input-group">
+            <label>ต้นทุนแฝง (ค่าน้ำ/ไฟ/น้ำมัน %)</label>
+            <input type="number" id="s-overhead" placeholder="เช่น 30" min="0" max="200" oninput="recalc()">
+          </div>
+          <div class="summary-input-group">
+            <label>ค่าแรง (%)</label>
+            <input type="number" id="s-labor" placeholder="เช่น 20" min="0" max="200" oninput="recalc()">
+          </div>
+
+          <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-bottom:8px">ต้นทุนอื่นๆ ต่อชิ้น (บาท)</div>
+          <div id="other-costs-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-bottom:12px;width:100%;font-size:0.8rem;border-color:rgba(255,255,255,0.3);color:#fff" onclick="addOtherCost()">+ เพิ่มรายการ (แพ็คเกจ/ถุง/สติ๊กเกอร์)</button>
+
+          <div class="summary-row">
+            <span class="label">ต้นทุน/ชิ้น (รวมทุกอย่าง)</span>
+            <span class="value" id="s-total-cost">0.00 ฿</span>
+          </div>
+
+          <hr class="summary-divider">
+
+          <div class="summary-input-group">
+            <label>กำไรที่ต้องการ (%)</label>
+            <input type="number" id="s-profit" placeholder="เช่น 50" min="0" oninput="recalc()">
+          </div>
+
+          <div class="summary-total">
+            <div class="total-label">💰 ราคาขายแนะนำ</div>
+            <div class="total-value" id="s-sell-price">— ฿</div>
+            <div style="font-size:0.75rem;color:rgba(255,255,255,0.6);margin-top:4px">กำไรต่อชิ้น: <span id="s-profit-amount">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: ตั้งค่า ===== -->
+  <div id="tab-settings" class="tab-panel">
+    <div class="section-title" style="margin-bottom:20px">⚙️ การตั้งค่า</div>
+
+    <div class="settings-section">
+      <h3>🔗 เชื่อมต่อ Google Sheets (Apps Script)</h3>
+      <div class="api-url-note">
+        วางลิงก์ Web App URL ที่ได้จากการ Deploy Apps Script ด้านล่าง<br>
+        รูปแบบ: <code>https://script.google.com/macros/s/XXXX.../exec</code>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Apps Script Web App URL</label>
+        <input type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <button class="btn btn-primary" onclick="saveApiUrl()">บันทึก URL</button>
+      <button class="btn btn-secondary" style="margin-left:8px" onclick="testConnection()">🔌 ทดสอบการเชื่อมต่อ</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>🏪 ข้อมูลร้าน</h3>
+      <div class="form-group" style="max-width:360px;margin-bottom:14px">
+        <label>ชื่อร้าน</label>
+        <input type="text" id="shop-name-input" placeholder="ร้านขนมไทยแทนคุณ">
+      </div>
+      <button class="btn btn-primary" onclick="saveShopName()">บันทึกชื่อร้าน</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>📖 วิธีตั้งค่า Apps Script (ทีละขั้นตอน)</h3>
+      <ol style="padding-left:20px;line-height:2;font-size:0.9rem;color:var(--text-soft)">
+        <li>เปิด <strong>Google Sheet</strong> ใหม่ที่ <a href="https://sheets.google.com" target="_blank" style="color:var(--gold-dark)">sheets.google.com</a></li>
+        <li>คลิกเมนู <strong>ส่วนขยาย → Apps Script</strong></li>
+        <li>ลบโค้ดเดิมออก แล้ว<strong>วางโค้ดจากไฟล์ Code.gs</strong> ที่ดาวน์โหลดมา</li>
+        <li>กด <strong>💾 บันทึก</strong> แล้วกด <strong>Deploy → New deployment</strong></li>
+        <li>เลือก Type = <strong>Web app</strong>, Execute as = <strong>Me</strong>, Who has access = <strong>Anyone</strong></li>
+        <li>กด Deploy แล้ว <strong>คัดลอก URL</strong> ที่ได้มาวางในช่องด้านบน</li>
+      </ol>
+    </div>
+  </div>
+
+</main>
+
+<!-- ===== MODALS ===== -->
+
+<div id="modal-ingredient" class="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-ing-title">เพิ่มวัตถุดิบ</h3>
+    <input type="hidden" id="ing-edit-id">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>ชื่อวัตถุดิบ *</label>
+        <input type="text" id="ing-name" placeholder="เช่น แป้งข้าวเจ้า">
+      </div>
+      <div class="form-group">
+        <label>ราคา (บาท) *</label>
+        <input type="number" id="ing-price" placeholder="0.00" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label>ปริมาณ *</label>
+        <input type="number" id="ing-quantity" placeholder="เช่น 1000" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label>หน่วย *</label>
+        <input type="text" id="ing-unit" placeholder="กรัม / มล. / ชิ้น">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-ingredient')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveIngredient()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ===========================
+// STATE
+// ===========================
+let API_URL = localStorage.getItem('api_url') || '';
+let SHOP_NAME = localStorage.getItem('shop_name') || '';
+let ingredients = [];
+let menus = [];
+let currentMenu = null; // { id, name, ingredients:[{id,name,qty,unit,pricePerUnit}], yield, overhead, labor, otherCosts:[], profit }
+let otherCostCounter = 0;
+
+// ===========================
+// INIT
+// ===========================
+document.addEventListener('DOMContentLoaded', () => {
+  if (API_URL) {
+    document.getElementById('api-url-input').value = API_URL;
+    document.getElementById('setup-banner').classList.add('hidden');
+    loadIngredients();
+    loadMenus();
+  }
+  if (SHOP_NAME) {
+    document.getElementById('shop-name-input').value = SHOP_NAME;
+    document.getElementById('shop-name-display').textContent = SHOP_NAME;
+  }
+});
+
+// ===========================
+// TABS
+// ===========================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['ingredients','menus','settings'][i] === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ===========================
+// API
+// ===========================
+async function api(action, body = {}) {
+  if (!API_URL) { showToast('กรุณาตั้งค่า URL ก่อน', 'error'); throw new Error('No API URL'); }
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action, ...body })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Unknown error');
+    return data;
+  } catch (e) {
+    showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+    throw e;
+  }
+}
+
+// ===========================
+// SETTINGS
+// ===========================
+function saveApiUrl() {
+  const url = document.getElementById('api-url-input').value.trim();
+  if (!url) { showToast('กรุณากรอก URL', 'error'); return; }
+  API_URL = url;
+  localStorage.setItem('api_url', url);
+  document.getElementById('setup-banner').classList.add('hidden');
+  showToast('บันทึก URL แล้ว ✓', 'success');
+  loadIngredients();
+  loadMenus();
+}
+
+async function testConnection() {
+  try {
+    showToast('กำลังทดสอบ...');
+    await api('getIngredients');
+    showToast('เชื่อมต่อสำเร็จ ✓', 'success');
+  } catch(e) {}
+}
+
+function saveShopName() {
+  const name = document.getElementById('shop-name-input').value.trim();
+  SHOP_NAME = name;
+  localStorage.setItem('shop_name', name);
+  document.getElementById('shop-name-display').textContent = name || 'ตั้งชื่อร้านในการตั้งค่า';
+  showToast('บันทึกชื่อร้านแล้ว ✓', 'success');
+}
+
+// ===========================
+// INGREDIENTS
+// ===========================
+async function loadIngredients() {
+  try {
+    const res = await api('getIngredients');
+    ingredients = res.data || [];
+    renderIngredientsTable();
+    renderIngSelectOptions();
+  } catch(e) {}
+}
+
+function renderIngredientsTable() {
+  const wrap = document.getElementById('ingredients-table-wrap');
+  if (!ingredients.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="icon">🥄</div><p>ยังไม่มีวัตถุดิบ — กดเพิ่มได้เลยครับ</p></div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table class="data-table">
+      <thead><tr>
+        <th>#</th><th>ชื่อวัตถุดิบ</th><th>ราคา</th><th>ปริมาณ</th><th>หน่วย</th><th>ราคา/หน่วย</th><th></th>
+      </tr></thead>
+      <tbody>${ingredients.map((ing, i) => `
+        <tr>
+          <td style="color:var(--text-muted)">${i+1}</td>
+          <td><strong>${ing.name}</strong></td>
+          <td>${formatNum(ing.price)} ฿</td>
+          <td>${formatNum(ing.quantity)}</td>
+          <td><span class="unit-badge">${ing.unit}</span></td>
+          <td><span class="price-per-unit">${formatNum(ing.price / ing.quantity, 4)} ฿/${ing.unit}</span></td>
+          <td style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick='openIngredientModal(${JSON.stringify(ing)})'>แก้ไข</button>
+            <button class="btn btn-danger" onclick="deleteIngredient('${ing.id}')">ลบ</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function renderIngSelectOptions() {
+  const sel = document.getElementById('ing-select');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">-- เลือก --</option>' +
+    ingredients.map(ing => `<option value="${ing.id}">${ing.name} (${ing.unit})</option>`).join('');
+  sel.value = prev;
+}
+
+function openIngredientModal(ing = null) {
+  document.getElementById('modal-ing-title').textContent = ing ? 'แก้ไขวัตถุดิบ' : 'เพิ่มวัตถุดิบ';
+  document.getElementById('ing-edit-id').value = ing ? ing.id : '';
+  document.getElementById('ing-name').value = ing ? ing.name : '';
+  document.getElementById('ing-price').value = ing ? ing.price : '';
+  document.getElementById('ing-quantity').value = ing ? ing.quantity : '';
+  document.getElementById('ing-unit').value = ing ? ing.unit : '';
+  document.getElementById('modal-ingredient').classList.add('open');
+}
+
+async function saveIngredient() {
+  const id = document.getElementById('ing-edit-id').value;
+  const name = document.getElementById('ing-name').value.trim();
+  const price = parseFloat(document.getElementById('ing-price').value);
+  const quantity = parseFloat(document.getElementById('ing-quantity').value);
+  const unit = document.getElementById('ing-unit').value.trim();
+  if (!name || isNaN(price) || isNaN(quantity) || !unit) { showToast('กรุณากรอกข้อมูลให้ครบ', 'error'); return; }
+  try {
+    await api('saveIngredient', { id: id || null, name, price, quantity, unit });
+    showToast((id ? 'แก้ไข' : 'เพิ่ม') + 'วัตถุดิบแล้ว ✓', 'success');
+    closeModal('modal-ingredient');
+    loadIngredients();
+  } catch(e) {}
+}
+
+async function deleteIngredient(id) {
+  if (!confirm('ลบวัตถุดิบนี้?')) return;
+  try {
+    await api('deleteIngredient', { id });
+    showToast('ลบแล้ว', 'success');
+    loadIngredients();
+  } catch(e) {}
+}
+
+// ===========================
+// MENUS
+// ===========================
+async function loadMenus() {
+  try {
+    const res = await api('getMenus');
+    menus = res.data || [];
+    renderMenuCards();
+  } catch(e) {}
+}
+
+function renderMenuCards() {
+  const grid = document.getElementById('menu-cards');
+  if (!menus.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">🍬</div><p>ยังไม่มีเมนู — กดเพิ่มเมนูใหม่</p></div>';
+    return;
+  }
+  grid.innerHTML = menus.map(m => {
+    const totalCost = calcMenuTotalCost(m);
+    const sellPrice = totalCost * (1 + (m.profit || 0) / 100);
+    return `<div class="menu-card" onclick="openMenuEditor('${m.id}')">
+      <div class="menu-card-name">🍮 ${m.name}</div>
+      <div class="menu-card-stats">
+        <div>วัตถุดิบ ${m.ingredients.length} รายการ</div>
+        <div>ได้ ${m.yield || '?'} ชิ้น | กำไร ${m.profit || 0}%</div>
+      </div>
+      <div class="menu-card-price">ราคาขาย ~${formatNum(sellPrice)} ฿/ชิ้น</div>
+      <div class="menu-card-actions">
+        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openMenuEditor('${m.id}')">✏️ แก้ไข</button>
+        <button class="btn btn-danger" onclick="event.stopPropagation();deleteMenu('${m.id}')">ลบ</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function calcMenuTotalCost(m) {
+  let ingCost = (m.ingredients || []).reduce((sum, i) => {
+    const ing = ingredients.find(x => x.id === i.id);
+    if (!ing) return sum;
+    return sum + (ing.price / ing.quantity) * i.qty;
+  }, 0);
+  const yld = m.yield || 1;
+  const perUnit = ingCost / yld;
+  const overhead = perUnit * ((m.overhead || 0) / 100);
+  const labor = perUnit * ((m.labor || 0) / 100);
+  const other = (m.otherCosts || []).reduce((s, c) => s + (parseFloat(c.amount) || 0), 0);
+  return perUnit + overhead + labor + other;
+}
+
+function openNewMenu() {
+  currentMenu = { id: null, name: '', ingredients: [], yield: '', overhead: '', labor: '', otherCosts: [], profit: '' };
+  otherCostCounter = 0;
+  renderMenuEditor();
+  document.getElementById('menu-list-view').style.display = 'none';
+  document.getElementById('menu-editor').style.display = 'block';
+}
+
+function openMenuEditor(id) {
+  const m = menus.find(x => x.id === id);
+  if (!m) return;
+  currentMenu = JSON.parse(JSON.stringify(m)); // deep copy
+  otherCostCounter = currentMenu.otherCosts.length;
+  renderMenuEditor();
+  document.getElementById('menu-list-view').style.display = 'none';
+  document.getElementById('menu-editor').style.display = 'block';
+}
+
+function backToMenuList() {
+  document.getElementById('menu-list-view').style.display = 'block';
+  document.getElementById('menu-editor').style.display = 'none';
+  currentMenu = null;
+}
+
+function renderMenuEditor() {
+  document.getElementById('menu-name').value = currentMenu.name || '';
+  document.getElementById('s-yield').value = currentMenu.yield || '';
+  document.getElementById('s-overhead').value = currentMenu.overhead || '';
+  document.getElementById('s-labor').value = currentMenu.labor || '';
+  document.getElementById('s-profit').value = currentMenu.profit || '';
+  renderMenuIngList();
+  renderOtherCosts();
+  recalc();
+}
+
+function renderMenuIngList() {
+  const list = document.getElementById('menu-ingredient-list');
+  if (!currentMenu.ingredients.length) {
+    list.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:10px 0">ยังไม่ได้เพิ่มวัตถุดิบ</div>';
+    return;
+  }
+  list.innerHTML = currentMenu.ingredients.map((item, idx) => {
+    const ing = ingredients.find(x => x.id === item.id);
+    const costPerUnit = ing ? (ing.price / ing.quantity) : 0;
+    const cost = costPerUnit * item.qty;
+    return `<div class="ingredient-list-item">
+      <div class="ing-name">${item.name}</div>
+      <div class="ing-qty">
+        <input type="number" value="${item.qty}" min="0" step="0.1"
+          onchange="updateIngQty(${idx}, this.value)"
+          style="width:70px;padding:5px 8px;font-size:0.85rem">
+        <span style="font-size:0.8rem;color:var(--text-muted)">${ing ? ing.unit : ''}</span>
+      </div>
+      <div class="ing-cost">${formatNum(cost)} ฿</div>
+      <button class="remove-ing" onclick="removeIngFromMenu(${idx})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function addIngredientToMenu() {
+  const sel = document.getElementById('ing-select');
+  const qty = parseFloat(document.getElementById('ing-qty').value);
+  const id = sel.value;
+  if (!id || isNaN(qty) || qty <= 0) { showToast('เลือกวัตถุดิบและใส่ปริมาณด้วย', 'error'); return; }
+  const ing = ingredients.find(x => x.id === id);
+  if (!ing) return;
+  if (currentMenu.ingredients.find(x => x.id === id)) { showToast('มีวัตถุดิบนี้แล้ว', 'error'); return; }
+  currentMenu.ingredients.push({ id: ing.id, name: ing.name, qty });
+  document.getElementById('ing-qty').value = '';
+  sel.value = '';
+  renderMenuIngList();
+  recalc();
+}
+
+function updateIngQty(idx, val) {
+  currentMenu.ingredients[idx].qty = parseFloat(val) || 0;
+  renderMenuIngList();
+  recalc();
+}
+
+function removeIngFromMenu(idx) {
+  currentMenu.ingredients.splice(idx, 1);
+  renderMenuIngList();
+  recalc();
+}
+
+function addOtherCost() {
+  otherCostCounter++;
+  const id = 'oc_' + otherCostCounter;
+  currentMenu.otherCosts.push({ id, name: '', amount: 0 });
+  renderOtherCosts();
+}
+
+function renderOtherCosts() {
+  const list = document.getElementById('other-costs-list');
+  list.innerHTML = currentMenu.otherCosts.map((oc, i) => `
+    <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
+      <input type="text" value="${oc.name}" placeholder="ชื่อ เช่น กล่อง"
+        style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:0.8rem;padding:6px 8px"
+        onchange="updateOtherCost(${i},'name',this.value)">
+      <input type="number" value="${oc.amount}" placeholder="฿"
+        style="width:70px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:0.8rem;padding:6px 8px"
+        onchange="updateOtherCost(${i},'amount',this.value)" oninput="recalc()">
+      <button onclick="removeOtherCost(${i})" style="background:none;border:none;color:rgba(255,100,100,0.8);cursor:pointer;font-size:1rem">✕</button>
+    </div>`).join('');
+}
+
+function updateOtherCost(idx, key, val) {
+  currentMenu.otherCosts[idx][key] = key === 'amount' ? parseFloat(val) || 0 : val;
+  recalc();
+}
+
+function removeOtherCost(idx) {
+  currentMenu.otherCosts.splice(idx, 1);
+  renderOtherCosts();
+  recalc();
+}
+
+function recalc() {
+  if (!currentMenu) return;
+
+  currentMenu.yield = parseFloat(document.getElementById('s-yield').value) || 0;
+  currentMenu.overhead = parseFloat(document.getElementById('s-overhead').value) || 0;
+  currentMenu.labor = parseFloat(document.getElementById('s-labor').value) || 0;
+  currentMenu.profit = parseFloat(document.getElementById('s-profit').value) || 0;
+
+  // 1. Total ingredient cost
+  let ingTotal = currentMenu.ingredients.reduce((sum, item) => {
+    const ing = ingredients.find(x => x.id === item.id);
+    if (!ing) return sum;
+    return sum + (ing.price / ing.quantity) * item.qty;
+  }, 0);
+  document.getElementById('s-ingredient-total').textContent = formatNum(ingTotal) + ' ฿';
+
+  // 2. Per unit
+  const yld = currentMenu.yield || 1;
+  const perUnit = ingTotal / yld;
+  document.getElementById('s-cost-per-unit').textContent = formatNum(perUnit) + ' ฿';
+
+  // 3. Overhead + labor
+  const overheadAmt = perUnit * (currentMenu.overhead / 100);
+  const laborAmt = perUnit * (currentMenu.labor / 100);
+
+  // 4. Other costs
+  const otherTotal = currentMenu.otherCosts.reduce((s, c) => s + (parseFloat(c.amount) || 0), 0);
+
+  // 5. Total cost per unit
+  const totalCost = perUnit + overheadAmt + laborAmt + otherTotal;
+  document.getElementById('s-total-cost').textContent = formatNum(totalCost) + ' ฿';
+
+  // 6. Sell price
+  const sellPrice = totalCost * (1 + currentMenu.profit / 100);
+  const profitAmt = sellPrice - totalCost;
+  document.getElementById('s-sell-price').textContent = formatNum(sellPrice) + ' ฿';
+  document.getElementById('s-profit-amount').textContent = formatNum(profitAmt) + ' ฿';
+}
+
+async function saveCurrentMenu() {
+  currentMenu.name = document.getElementById('menu-name').value.trim();
+  if (!currentMenu.name) { showToast('ใส่ชื่อเมนูด้วย', 'error'); return; }
+  recalc();
+  try {
+    const res = await api('saveMenu', currentMenu);
+    if (!currentMenu.id && res.id) currentMenu.id = res.id;
+    showToast('บันทึกเมนูแล้ว ✓', 'success');
+    loadMenus();
+  } catch(e) {}
+}
+
+async function deleteMenu(id) {
+  if (!confirm('ลบเมนูนี้?')) return;
+  try {
+    await api('deleteMenu', { id });
+    showToast('ลบเมนูแล้ว', 'success');
+    loadMenus();
+  } catch(e) {}
+}
+
+// ===========================
+// UTILS
+// ===========================
+function formatNum(n, dec = 2) {
+  if (isNaN(n) || !isFinite(n)) return '0.00';
+  return Number(n).toLocaleString('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3000);
+}
+</script>
+</body>
+</html>
