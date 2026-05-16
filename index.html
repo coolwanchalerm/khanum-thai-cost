@@ -461,7 +461,7 @@
     padding: 12px 20px;
     border-radius: 10px;
     font-size: 0.9rem;
-    box-shadow: 0 4px 166px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     transform: translateY(80px);
     opacity: 0;
     transition: all 0.3s;
@@ -747,12 +747,12 @@
 // ===========================
 // STATE
 // ===========================
-// ฝัง URL ของ Apps Script ลงไปตรงนี้เป็นค่าเริ่มต้น หากมีใน localStorage จะดึงจากที่นั่นแทน
+// ฝัง URL Apps Script ของคุณลงไปตรงนี้โดยตรง เพื่อไม่ต้องกรอกข้อมูลใหม่ทุกครั้งที่ย้ายเครื่องหรือล้างแคช
 let API_URL = localStorage.getItem('api_url') || 'https://script.google.com/macros/s/AKfycbx-mDchZsqqu0lGr7T9lVxTV580mSivwPXRohcw7cNrupq-dZrZdYidalCsVQ-Md9Op/exec';
 let SHOP_NAME = localStorage.getItem('shop_name') || '';
 let ingredients = [];
 let menus = [];
-let currentMenu = null; // { id, name, ingredients:[{id,name,qty,unit,pricePerUnit}], yield, overhead, labor, otherCosts:[], profit }
+let currentMenu = null;
 let otherCostCounter = 0;
 
 // ===========================
@@ -788,7 +788,6 @@ function switchTab(tab) {
 async function api(action, body = {}) {
   if (!API_URL) { showToast('กรุณาตั้งค่า URL ก่อน', 'error'); throw new Error('No API URL'); }
   try {
-    // ส่งแบบ GET + URL params เพื่อหลีกเลี่ยง CORS preflight
     const payload = encodeURIComponent(JSON.stringify(body));
     const url = `${API_URL}?action=${action}&payload=${payload}`;
     const res = await fetch(url);
@@ -973,7 +972,7 @@ function openNewMenu() {
 function openMenuEditor(id) {
   const m = menus.find(x => x.id === id);
   if (!m) return;
-  currentMenu = JSON.parse(JSON.stringify(m)); // deep copy
+  currentMenu = JSON.parse(JSON.stringify(m));
   otherCostCounter = currentMenu.otherCosts.length;
   renderMenuEditor();
   document.getElementById('menu-list-view').style.display = 'none';
@@ -997,7 +996,6 @@ function renderMenuEditor() {
   recalc();
 }
 
-// (โค้ดฟังก์ชันอื่น ๆ ทำงานตามปกติเหมือนต้นฉบับ)
 function renderMenuIngList() {
   const list = document.getElementById('menu-ingredient-list');
   if (!currentMenu.ingredients.length) {
