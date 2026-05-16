@@ -461,7 +461,7 @@
     padding: 12px 20px;
     border-radius: 10px;
     font-size: 0.9rem;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 166px rgba(0,0,0,0.2);
     transform: translateY(80px);
     opacity: 0;
     transition: all 0.3s;
@@ -747,7 +747,8 @@
 // ===========================
 // STATE
 // ===========================
-let API_URL = localStorage.getItem('api_url') || '';
+// ฝัง URL ของ Apps Script ลงไปตรงนี้เป็นค่าเริ่มต้น หากมีใน localStorage จะดึงจากที่นั่นแทน
+let API_URL = localStorage.getItem('api_url') || 'https://script.google.com/macros/s/AKfycbx-mDchZsqqu0lGr7T9lVxTV580mSivwPXRohcw7cNrupq-dZrZdYidalCsVQ-Md9Op/exec';
 let SHOP_NAME = localStorage.getItem('shop_name') || '';
 let ingredients = [];
 let menus = [];
@@ -996,6 +997,7 @@ function renderMenuEditor() {
   recalc();
 }
 
+// (โค้ดฟังก์ชันอื่น ๆ ทำงานตามปกติเหมือนต้นฉบับ)
 function renderMenuIngList() {
   const list = document.getElementById('menu-ingredient-list');
   if (!currentMenu.ingredients.length) {
@@ -1087,7 +1089,6 @@ function recalc() {
   currentMenu.labor = parseFloat(document.getElementById('s-labor').value) || 0;
   currentMenu.profit = parseFloat(document.getElementById('s-profit').value) || 0;
 
-  // 1. Total ingredient cost
   let ingTotal = currentMenu.ingredients.reduce((sum, item) => {
     const ing = ingredients.find(x => x.id === item.id);
     if (!ing) return sum;
@@ -1095,23 +1096,18 @@ function recalc() {
   }, 0);
   document.getElementById('s-ingredient-total').textContent = formatNum(ingTotal) + ' ฿';
 
-  // 2. Per unit
   const yld = currentMenu.yield || 1;
   const perUnit = ingTotal / yld;
   document.getElementById('s-cost-per-unit').textContent = formatNum(perUnit) + ' ฿';
 
-  // 3. Overhead + labor
   const overheadAmt = perUnit * (currentMenu.overhead / 100);
   const laborAmt = perUnit * (currentMenu.labor / 100);
 
-  // 4. Other costs
   const otherTotal = currentMenu.otherCosts.reduce((s, c) => s + (parseFloat(c.amount) || 0), 0);
 
-  // 5. Total cost per unit
   const totalCost = perUnit + overheadAmt + laborAmt + otherTotal;
   document.getElementById('s-total-cost').textContent = formatNum(totalCost) + ' ฿';
 
-  // 6. Sell price
   const sellPrice = totalCost * (1 + currentMenu.profit / 100);
   const profitAmt = sellPrice - totalCost;
   document.getElementById('s-sell-price').textContent = formatNum(sellPrice) + ' ฿';
@@ -1139,9 +1135,6 @@ async function deleteMenu(id) {
   } catch(e) {}
 }
 
-// ===========================
-// UTILS
-// ===========================
 function formatNum(n, dec = 2) {
   if (isNaN(n) || !isFinite(n)) return '0.00';
   return Number(n).toLocaleString('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec });
